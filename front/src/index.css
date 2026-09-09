@@ -1,0 +1,190 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@layer components {
+  .layout-container {
+    @apply pr-5 pl-5 pt-5
+            2xl:pr-60 2xl:pl-60 
+            xl:pr-40 xl:pl-40
+            lg:pr-30 lg:pl-30 lg:pt-15
+            md:pr-20 md:pl-20 md:pt-12
+            sm:pr-10 sm:pl-10 sm:pt-8;
+  }
+}
+@layer base {
+  html,
+  body,
+  #root {
+    height: 90%;
+  }
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.blocked {
+  background: #fb2c36;
+}
+
+.done {
+  background: #9ae600;
+}
+
+@theme {
+  --font-inter: "Inter", sans-serif;
+}
+
+/* =============== Style pour les Modales =================== */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 1001;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+
+  animation: modalIn 0.2s ease-out;
+}
+
+input,
+select {
+  border: solid 1px lightgray;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+textarea {
+  border: solid 1px lightgray;
+  padding: 5px;
+  border-radius: 5px;
+  min-height: 100px;
+}
+.mySwiper .swiper-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mySwiper .swiper-pagination-bullet-active {
+  background: #f0b100;
+  opacity: 1;
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.mySwiper .swiper-pagination-bullet {
+  width: 12px;
+  height: 12px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .scrollbar-Y {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+}
+
+.simplebar-track.simplebar-horizontal {
+  background: #ECEFF1;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.simplebar-track.simplebar-vertical {
+  background: #d9d9d9;
+  width: 8px;
+  border-radius: 999px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.simplebar-scrollbar.simplebar-visible::before {
+  background-color: #FFC107;
+  opacity: 1;
+  border-radius: 999px;
+}
+
+.in-progress {
+  background: oklch(94.3% 0.029 294.588);
+  color: oklch(55.8% 0.288 302.321);
+}
+
+.to-do {
+  background: oklch(93.2% 0.032 255.585);
+  color: oklch(54.6% 0.245 262.881);
+}
+
+.blocked {
+  background: oklch(93.6% 0.032 17.717);
+  color: oklch(57.7% 0.245 27.325);
+}
+
+.done {
+  background: oklch(96.2% 0.044 156.743);
+  color: oklch(62.7% 0.194 149.214);
+}
+.planned {
+  background: oklch(93.2% 0.032 255.585);
+  color: oklch(54.6% 0.245 262.881);
+}
+.completed {
+  background: oklch(96.2% 0.044 156.743);
+  color: oklch(62.7% 0.194 149.214);
+}
+/* =============== Style pour les Modales =================== */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 1001;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  min-width: 300px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+
+  animation: modalIn 0.2s ease-out;
+}

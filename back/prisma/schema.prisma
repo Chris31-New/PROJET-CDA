@@ -1,0 +1,303 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../prisma/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum RoleEnum {
+  INDIVIDUAL
+  SITE_MANAGER
+  COMPANY
+}
+
+enum GenericNotification {
+  INFO
+  WARNING
+  ALERT
+}
+
+enum CompanyType {
+  ARTISAN
+  SUBCONTRACTOR
+  COMPANY
+}
+
+enum ProjectType {
+  RENOVATION
+  CONSTRUCTION
+}
+
+enum StatusProject {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+  CANCELLED
+}
+
+enum StatusTask {
+  IN_PROGRESS
+  DONE
+  BLOCKED
+  TO_DO
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  password     String
+  role         RoleEnum
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  refreshToken String?  @db.Text
+
+  profile             Profile?
+  companies           Company[]
+  individualProjects  Project[] @relation("IndividualProjects")
+  siteManagerProjects Project[] @relation("SiteManagerProjects")
+
+  notifications User_Has_Notification[]
+}
+
+model Profile {
+  userId    Int      @id
+  phone     String?
+  firstName String?
+  lastName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Address {
+  id          Int      @id @default(autoincrement())
+  city        String   @db.VarChar(50)
+  address     String
+  postal_code String   @db.VarChar(5)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projects Project[]
+  companies Company[]
+  @@unique([address, city, postal_code], name: "address_city_postal_code")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(50) @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  articles Article[]
+}
+
+model Company {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(50)
+  type        CompanyType
+  description String
+  siren       String
+  address_id  Int
+  city        String      @db.VarChar(50)
+  email       String      @unique
+  logo        String      @db.Text
+  image       String      @db.Text
+  phone       String      @db.VarChar(20)
+  employeeCount String
+  userId      Int         @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  address          Address                  @relation(fields: [address_id], references: [id])
+  refUser          User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialities     Company_Has_Speciality[]
+  tasks            Task[]
+  unavailabilities Company_Unavailability[]
+  projects         Project_Has_Company[]
+
+  @@index([userId])
+}
+
+model Project {
+  id              Int           @id @default(autoincrement())
+  number_Project  String        @unique
+  name            String
+  description     String        @db.Text
+  start_date      DateTime
+  end_Date        DateTime
+  status          StatusProject
+  budget          Int
+  individual_id   Int
+  site_manager_id Int
+  image           String         @db.Text
+  project_type    ProjectType
+  address_id      Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  addressRef      Address @relation(fields: [address_id], references: [id])
+  individual   User    @relation("IndividualProjects", fields: [individual_id], references: [id], onDelete: Cascade)
+  site_manager User    @relation("SiteManagerProjects", fields: [site_manager_id], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
+  tasks         Task[]
+  companies     Project_Has_Company[]
+}
+
+model Speciality {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks     Task[]
+  companies Company_Has_Speciality[]
+}
+
+model Task {
+  id            Int        @id @default(autoincrement())
+  name          String     @db.VarChar(50)
+  description   String     @db.Text
+  start_date    DateTime
+  end_date      DateTime
+  status        StatusTask
+  status_note   String
+  project_id    Int
+  company_id    Int?
+  speciality_id Int
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  notifications       Notification[]
+  shoppingLines       Shopping_Line[]
+  dependancesAsFirst  Task_Dependance[] @relation("DependanceFirstTask")
+  dependancesAsSecond Task_Dependance[] @relation("DependanceSecondTask")
+
+  project    Project    @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  company    Company?   @relation(fields: [company_id], references: [id])
+  speciality Speciality @relation(fields: [speciality_id], references: [id])
+}
+
+model Article {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(50) @unique
+  category_id Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  shoppingLines Shopping_Line[]
+  category      Category        @relation(fields: [category_id], references: [id])
+}
+
+model Shopping_Line {
+  id         Int      @id @default(autoincrement())
+  task_id    Int
+  article_id Int
+  unit_price Int
+  quantity   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  task    Task    @relation(fields: [task_id], references: [id])
+  article Article @relation(fields: [article_id], references: [id])
+
+  @@unique([task_id, article_id])
+}
+
+model Generic_Notification {
+  id        Int                 @id @default(autoincrement())
+  type      GenericNotification
+  title     String              @db.VarChar(50) @unique
+  message   String
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  notifications Notification[]
+}
+
+model Notification {
+  id                      Int      @id @default(autoincrement())
+  generic_notification_id Int
+  send_date               DateTime @default(now())
+  task_id                 Int?
+  project_id              Int?
+  is_archived             Boolean
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  genericNotification Generic_Notification    @relation(fields: [generic_notification_id], references: [id])
+  task                Task?                   @relation(fields: [task_id], references: [id])
+  project             Project?                @relation(fields: [project_id], references: [id])
+  users               User_Has_Notification[]
+}
+
+model User_Has_Notification {
+  user_id         Int
+  notification_id Int
+  reading_date    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, notification_id]) 
+}
+
+model Company_Unavailability {
+  id         Int      @id @default(autoincrement())
+  start_date DateTime @default(now())
+  end_date   DateTime
+  company_id Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+}
+
+model Company_Has_Speciality {
+  company_id    Int
+  speciality_id Int
+  company       Company    @relation(fields: [company_id], references: [id])
+  speciality    Speciality @relation(fields: [speciality_id], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@id([company_id, speciality_id])
+}
+
+model Project_Has_Company {
+  company_id Int
+  project_id Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  company Company @relation(fields: [company_id], references: [id])
+  project Project @relation(fields: [project_id], references: [id])
+
+  @@id([company_id, project_id])
+}
+
+model Task_Dependance {
+  first_task_id  Int
+  second_task_id Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  firstTask Task @relation("DependanceFirstTask", fields: [first_task_id], references: [id], onDelete: Cascade)
+
+  secondTask Task @relation("DependanceSecondTask", fields: [second_task_id], references: [id], onDelete: Cascade)
+
+  @@id([first_task_id, second_task_id])
+}
